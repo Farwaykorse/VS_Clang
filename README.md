@@ -2,15 +2,15 @@
 # Clang Integration for Visual Studio, stand-alone
 <!----------------------------------------------------------------------------->
 
-This is a test version for a patch for the VS integration for LLVM/Clang,
-to support Visual Studio 2017.
+Implementation to test an update for the LLVM/Clang integration.
+To support Visual Studio 2017.
 
 Target: Clang for Windows, stable release v5.0.1
 
 For the progress on an LLVM patch and to report issues go to:
 [Farwaykorse/llvm](https://github.com/Farwaykorse/llvm)  
 *Note*: This version is for testing, and might contain changes not yet published
-in the patch repository.
+to the patch repository.
 
 
 <!----------------------------------------------------><a id="instructions"></a>
