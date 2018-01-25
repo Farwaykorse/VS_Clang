@@ -2,72 +2,90 @@
 
 echo Uninstalling MSVC integration...
 
-REM CD to the directory of this batch file.
+
+rem Set current directory to the location of this batch file.
 cd /d %~dp0
 
-set PLATFORM=None
-:LOOPHEAD
-IF %PLATFORM% == x64 GOTO LOOPEND
-IF %PLATFORM% == Win32 SET PLATFORM=x64
-IF %PLATFORM% == None SET PLATFORM=Win32
+
+:: Search for the VC toolsets == $(VCTargetsPath)
+if defined ProgramFiles(x86) (
+  set "_BaseDir=%ProgramFiles(x86)%") else (set "_BaseDir=%ProgramFiles%")
+:: TODO Is VS, before VS2017, always installed in Prog~(x86) on 64-bit systems?
+:: VS2010 (v100)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
+:: VS2012 (v110)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V110"
+:: VS2013 (v120)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V120"
+:: VS2015 (v140)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V140"
+:: VS2017 (v141) and later
+call :fn_installations
+goto FINISHED
 
 
-SET D="%ProgramFiles%\MSBuild\Microsoft.Cpp\v4.0\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2010 del %D%\LLVM-vs2010\Microsoft.Cpp.%PLATFORM%.LLVM-vs2010.props
-IF EXIST %D%\LLVM-vs2010 del %D%\LLVM-vs2010\Microsoft.Cpp.%PLATFORM%.LLVM-vs2010.targets
-IF EXIST %D%\LLVM-vs2010 rmdir %D%\LLVM-vs2010
-SET D="%ProgramFiles(x86)%\MSBuild\Microsoft.Cpp\v4.0\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2010 del %D%\LLVM-vs2010\Microsoft.Cpp.%PLATFORM%.LLVM-vs2010.props
-IF EXIST %D%\LLVM-vs2010 del %D%\LLVM-vs2010\Microsoft.Cpp.%PLATFORM%.LLVM-vs2010.targets
-IF EXIST %D%\LLVM-vs2010 rmdir %D%\LLVM-vs2010
-
-SET D="%ProgramFiles%\MSBuild\Microsoft.Cpp\v4.0\V110\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2012 del %D%\LLVM-vs2012\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012.props
-IF EXIST %D%\LLVM-vs2012 del %D%\LLVM-vs2012\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012.targets
-IF EXIST %D%\LLVM-vs2012 rmdir %D%\LLVM-vs2012
-IF EXIST %D%\LLVM-vs2012_xp del %D%\LLVM-vs2012_xp\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012_xp.props
-IF EXIST %D%\LLVM-vs2012_xp del %D%\LLVM-vs2012_xp\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012_xp.targets
-IF EXIST %D%\LLVM-vs2012_xp rmdir %D%\LLVM-vs2012_xp
-SET D="%ProgramFiles(x86)%\MSBuild\Microsoft.Cpp\v4.0\V110\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2012 del %D%\LLVM-vs2012\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012.props
-IF EXIST %D%\LLVM-vs2012 del %D%\LLVM-vs2012\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012.targets
-IF EXIST %D%\LLVM-vs2012 rmdir %D%\LLVM-vs2012
-IF EXIST %D%\LLVM-vs2012_xp del %D%\LLVM-vs2012_xp\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012_xp.props
-IF EXIST %D%\LLVM-vs2012_xp del %D%\LLVM-vs2012_xp\Microsoft.Cpp.%PLATFORM%.LLVM-vs2012_xp.targets
-IF EXIST %D%\LLVM-vs2012_xp rmdir %D%\LLVM-vs2012_xp
-
-SET D="%ProgramFiles%\MSBuild\Microsoft.Cpp\v4.0\V120\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2013 del %D%\LLVM-vs2013\toolset.props
-IF EXIST %D%\LLVM-vs2013 del %D%\LLVM-vs2013\toolset.targets
-IF EXIST %D%\LLVM-vs2013 rmdir %D%\LLVM-vs2013
-IF EXIST %D%\LLVM-vs2013_xp del %D%\LLVM-vs2013_xp\toolset.props
-IF EXIST %D%\LLVM-vs2013_xp del %D%\LLVM-vs2013_xp\toolset.targets
-IF EXIST %D%\LLVM-vs2013_xp rmdir %D%\LLVM-vs2013_xp
-SET D="%ProgramFiles(x86)%\MSBuild\Microsoft.Cpp\v4.0\V120\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2013 del %D%\LLVM-vs2013\toolset.props
-IF EXIST %D%\LLVM-vs2013 del %D%\LLVM-vs2013\toolset.targets
-IF EXIST %D%\LLVM-vs2013 rmdir %D%\LLVM-vs2013
-IF EXIST %D%\LLVM-vs2013_xp del %D%\LLVM-vs2013_xp\toolset.props
-IF EXIST %D%\LLVM-vs2013_xp del %D%\LLVM-vs2013_xp\toolset.targets
-IF EXIST %D%\LLVM-vs2013_xp rmdir %D%\LLVM-vs2013_xp
-
-SET D="%ProgramFiles%\MSBuild\Microsoft.Cpp\v4.0\V140\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2014 del %D%\LLVM-vs2014\toolset.props
-IF EXIST %D%\LLVM-vs2014 del %D%\LLVM-vs2014\toolset.targets
-IF EXIST %D%\LLVM-vs2014 rmdir %D%\LLVM-vs2014
-IF EXIST %D%\LLVM-vs2014_xp del %D%\LLVM-vs2014_xp\toolset.props
-IF EXIST %D%\LLVM-vs2014_xp del %D%\LLVM-vs2014_xp\toolset.targets
-IF EXIST %D%\LLVM-vs2014_xp rmdir %D%\LLVM-vs2014_xp
-SET D="%ProgramFiles(x86)%\MSBuild\Microsoft.Cpp\v4.0\V140\Platforms\%PLATFORM%\PlatformToolsets"
-IF EXIST %D%\LLVM-vs2014 del %D%\LLVM-vs2014\toolset.props
-IF EXIST %D%\LLVM-vs2014 del %D%\LLVM-vs2014\toolset.targets
-IF EXIST %D%\LLVM-vs2014 rmdir %D%\LLVM-vs2014
-IF EXIST %D%\LLVM-vs2014_xp del %D%\LLVM-vs2014_xp\toolset.props
-IF EXIST %D%\LLVM-vs2014_xp del %D%\LLVM-vs2014_xp\toolset.targets
-IF EXIST %D%\LLVM-vs2014_xp rmdir %D%\LLVM-vs2014_xp
+:fn_installations
+:: Remove integration for VS2017 and later.
+:: Uses vswhere to find the install directories.
+setlocal
+if DEFINED ProgramFiles(x86) (
+  set "_VSWhere=%ProgramFiles(x86)%") else (set "_VSWhere=%ProgramFiles%")
+set _VSWhere="%_VSWhere%\Microsoft Visual Studio\Installer\vswhere.exe"
+if not exist %_VSWhere% goto:eof
+for /f "usebackq tokens=*" %%i in (
+  `%_VSWhere% -all -prerelease -products * -property installationPath`
+) do (
+  :: Construct path equal to $(VCTargetsPath)
+  call :fn_platforms "%%i\Common7\IDE\VC\VCTargets" &rem VS2017, ...
+)
+endlocal
+goto:eof
 
 
-GOTO LOOPHEAD
+:fn_platforms
+:: Find supported platforms by folder name
+setlocal
+if [%1]==[] echo DEBUG: fn_platforms - no input & goto:eof
+set "_VCTargetsPath=%~1"
+if not exist "%_VCTargetsPath%\Platforms" goto:eof
+for /f "usebackq tokens=*" %%P in (`dir "%_VCTargetsPath%\Platforms" /a:d /b`
+) do (
+  :: check for matching platform in LLVM install at .\
+  if exist ".\%%P" (
+    call :fn_remove "%_VCTargetsPath%\Platforms\%%P\PlatformToolsets"
+  )
+)
+endlocal
+goto:eof
 
-:LOOPEND
+
+:fn_remove
+:: Performs the removal operations
+setlocal
+if [%1]==[] echo DEBUG: fn_remove: no input & goto:eof
+set "_ToolsetDir=%~1"
+set "_Platform=%~2"
+if not exist "%_ToolsetDir%\LLVM-*" goto:eof
+setlocal EnableDelayedExpansion
+for /f "usebackq tokens=*" %%D in (`dir "%_ToolsetDir%\LLVM-*" /a:d /b`) do (
+  echo "%_ToolsetDir%\%%D"
+  set _File="%_ToolsetDir%\%%D\toolset.props"
+  if exist !_File! del !_File!
+  set _File="%_ToolsetDir%\%%D\toolset.targets"
+  if exist !_File! del !_File!
+  :: For VS2010 / VS2012
+  set _File="%_ToolsetDir%\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.props"
+  if exist !_File! del !_File!
+  set _File="%_ToolsetDir%\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.targets"
+  if exist !_File! del !_File!
+  :: Remove folder, if empty
+  rmdir "%_ToolsetDir%\%%D"
+)
+endlocal &REM /EnableDelayedExpansion
+endlocal
+goto:eof
+
+
+:FINISHED
 echo Done!
+pause
