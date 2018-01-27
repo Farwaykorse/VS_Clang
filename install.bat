@@ -4,7 +4,6 @@ echo Installing MSVC integration...
 set /a "_SCount=0"
 set /a "_FCount=0"
 
-
 REM Set current directory to the location of this batch file.
 pushd "%~dp0"
 
@@ -19,27 +18,27 @@ call :fn_vswhere
 popd
 goto FINISHED
 
+:: Function Definitions.
 
 :fn_legacy
-:: Search for the VC toolsets == $(VCTargetsPath)
+:: Try known values for $(VCTargetsPath) to find MSVC toolsets.
 setlocal
 if [%1]==[] echo DEBUG: fn_legacy - no input & goto:eof
 set "_BaseDir=%~1"
-:: VS2010 (v100)
+:: VS2010 (v100).
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
-:: VS2012 (v110)
+:: VS2012 (v110).
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V110"
-:: VS2013 (v120)
+:: VS2013 (v120).
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V120"
-:: VS2015 (v140)
+:: VS2015 (v140).
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V140"
 endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
 goto:eof
 
 
 :fn_vswhere
-:: Install integration for VS2017 and later.
-:: Uses vswhere to find the install directories.
+:: Install integration since VS2017. Using the Visual Studio Locator tool.
 setlocal
 if DEFINED ProgramFiles(x86) (
   set "_Vswhere=%ProgramFiles(x86)%") else (set "_Vswhere=%ProgramFiles%")
@@ -47,8 +46,7 @@ set _Vswhere="%_Vswhere%\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist %_Vswhere% goto:eof
 for /f "usebackq tokens=*" %%i in (
   `%_Vswhere% -all -prerelease -products * -property installationPath`
-) do (
-  :: Construct path equal to $(VCTargetsPath)
+) do ( :: Construct path equal to $(VCTargetsPath).
   call :fn_platforms "%%i\Common7\IDE\VC\VCTargets"
 )
 endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
@@ -56,7 +54,7 @@ goto:eof
 
 
 :fn_platforms
-:: Find supported platforms by folder name
+:: Find supported platforms by folder name.
 setlocal
 if [%1]==[] echo DEBUG: fn_platforms - no input & goto:eof
 set "_VCTargetsPath=%~1"
@@ -64,28 +62,27 @@ if not exist "%_VCTargetsPath%\Platforms" goto:eof
 setlocal EnableDelayedExpansion
 for /f "usebackq tokens=*" %%P in (`dir "!_VCTargetsPath!\Platforms" /a:d /b`
 ) do (
-  :: check for matching platform in LLVM install at .\
   if exist ".\%%P" (
     call :fn_toolsets "!_VCTargetsPath!\Platforms\%%P\PlatformToolsets" %%P
     if not !ERRORLEVEL!==0 set /a "_FCount+=1"
   )
 )
-endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%" &REM /EnableDelayedExpansion
+endlocal & ( REM /EnableDelayedExpansion.
+  set "_SCount=%_SCount%" & set "_FCount=%_FCount%" )
 endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
 exit /b 0 &:: Contain ERRORLEVEL.
 
 
 :fn_toolsets
-:: Install Clang integration for each supported toolset that is present
+:: Install Clang integration for each supported toolset that is present.
 setlocal DisableDelayedExpansion
 if [%2]==[] echo DEBUG: fn_toolsets - no input & goto:eof
 set "_ToolsetDir=%~1"
 set "_Platform=%2"
-:: Supported Toolsets
 :: -------------- configurations --------------
 :: Installing the v100 toolchain.
-set   _MSname=v100           &REM folder names
-set _LLVMname=LLVM-vs2010
+set   _MSname=v100           &REM Default toolset folder.
+set _LLVMname=LLVM-vs2010    &REM New folder.
 set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2010.props
 set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2010.targets
 if exist "%_ToolsetDir%\%_MSname%" (
@@ -141,8 +138,8 @@ if exist "%_ToolsetDir%\%_MSname%" (
 if not %ERRORLEVEL%==0 goto:eof
 
 :: Installing the v141 toolchain.
-set   _MSname=v141           &REM folder name
-set _LLVMname=LLVM-vs2017    &REM folder name in .\
+set   _MSname=v141           &REM Default toolset folder.
+set _LLVMname=LLVM-vs2017    &REM New folder.
 set    _Props=toolset-vs2017.props
 set  _Targets=toolset-vs2017.targets
 if exist "%_ToolsetDir%\%_MSname%" (
@@ -161,13 +158,13 @@ goto:eof
 
 
 :fn_copy
-:: Performs the copy operations
+:: Perform the copy operations.
 setlocal
 :: arguments: 1 ToolsetDir, 2 Folder, 3 platform 4 .props, 5 .targets, 6 doNotRename
 if [%5]==[] echo DEBUG: fn_copy - no input & goto:eof
 if not exist %1 echo DEBUG: fn_copy - input error & goto:eof
-if not exist ".\%3\%4" goto:eof &:: No LLVM config. for platform/toolset
-echo Install: %2(%3)
+if not exist ".\%3\%4" goto:eof &:: No LLVM toolset configuration defined.
+echo Install: %2 (%3)
 set "_Dir=%~1\%2"
 if not exist "%_Dir%" mkdir "%_Dir%" & echo make dir
 if not %ERRORLEVEL%==0 goto:eof
@@ -177,7 +174,7 @@ if not [%6]==[] goto doNotRename
   if exist ".\%3\%5" copy %3\%5 "%_Dir%\toolset.targets" > NUL
   if not %ERRORLEVEL%==0 goto:eof
 goto CopyEnd
-:doNotRename &:: VS2010 & VS2012
+:doNotRename &:: VS2010 & VS2012.
   if exist ".\%3\%4" copy %3\%4 "%_Dir%" > NUL
   if not %ERRORLEVEL%==0 goto:eof
   if exist ".\%3\%5" copy %3\%5 "%_Dir%" > NUL
