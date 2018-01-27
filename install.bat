@@ -1,37 +1,43 @@
 @echo off
 
 echo Installing MSVC integration...
-set /a "_Count=0"
+set /a "_SCount=0"
+set /a "_FCount=0"
+
 
 REM Set current directory to the location of this batch file.
-cd /d %~dp0
+pushd "%~dp0"
 
+:: Legacy installations.
+if defined ProgramFiles(x86) call :fn_legacy "%ProgramFiles(x86)%"
+if not %ERRORLEVEL%==0 goto FINISHED
+call :fn_legacy "%ProgramFiles%"
+if not %ERRORLEVEL%==0 goto FINISHED
+:: VS2017 (VC++ toolset v141) and later.
+call :fn_vswhere
 
-:: Search for the VC toolsets == $(VCTargetsPath)
-if defined ProgramFiles(x86) (
-  set "_BaseDir=%ProgramFiles(x86)%") else (set "_BaseDir=%ProgramFiles%")
-:: TODO Is MSBuild, before VS2017, always in Prog~(x86) on 64-bit systems?
-:: -------------- configurations --------------
-:: VS2010 (v100)
-call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
-if not %ERRORLEVEL%==0 goto FAILED
-:: VS2012 (v110)
-call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V110"
-if not %ERRORLEVEL%==0 goto FAILED
-:: VS2013 (v120)
-call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V120"
-if not %ERRORLEVEL%==0 goto FAILED
-:: VS2015 (v140)
-call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V140"
-if not %ERRORLEVEL%==0 goto FAILED
-:: VS2017 (v141) and later
-call :fn_installations
-if not %ERRORLEVEL%==0 goto FAILED
-:: --------------------------------------------
+popd
 goto FINISHED
 
 
-:fn_installations
+:fn_legacy
+:: Search for the VC toolsets == $(VCTargetsPath)
+setlocal
+if [%1]==[] echo DEBUG: fn_legacy - no input & goto:eof
+set "_BaseDir=%~1"
+:: VS2010 (v100)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
+:: VS2012 (v110)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V110"
+:: VS2013 (v120)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V120"
+:: VS2015 (v140)
+call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V140"
+endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
+goto:eof
+
+
+:fn_vswhere
 :: Install integration for VS2017 and later.
 :: Uses vswhere to find the install directories.
 setlocal
@@ -43,10 +49,9 @@ for /f "usebackq tokens=*" %%i in (
   `%_Vswhere% -all -prerelease -products * -property installationPath`
 ) do (
   :: Construct path equal to $(VCTargetsPath)
-  call :fn_platforms "%%i\Common7\IDE\VC\VCTargets" &:: VS2017, ...
-  if not %ERRORLEVEL%==0 goto:eof
+  call :fn_platforms "%%i\Common7\IDE\VC\VCTargets"
 )
-endlocal & set "_Count=%_Count%"
+endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
 goto:eof
 
 
@@ -62,12 +67,12 @@ for /f "usebackq tokens=*" %%P in (`dir "!_VCTargetsPath!\Platforms" /a:d /b`
   :: check for matching platform in LLVM install at .\
   if exist ".\%%P" (
     call :fn_toolsets "!_VCTargetsPath!\Platforms\%%P\PlatformToolsets" %%P
-    if not !ERRORLEVEL!==0 goto:eof
+    if not !ERRORLEVEL!==0 set /a "_FCount+=1"
   )
 )
-endlocal & set "_Count=%_Count%" &REM /EnableDelayedExpansion
-endlocal & set "_Count=%_Count%"
-goto:eof
+endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%" &REM /EnableDelayedExpansion
+endlocal & set "_SCount=%_SCount%" & set "_FCount=%_FCount%"
+exit /b 0 &:: Contain ERRORLEVEL.
 
 
 :fn_toolsets
@@ -151,7 +156,7 @@ if exist "%_ToolsetDir%\%_MSname%" (
   call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
 if not %ERRORLEVEL%==0 goto:eof
 :: --------------------------------------------
-endlocal & set "_Count=%_Count%"
+endlocal & set "_SCount=%_SCount%"
 goto:eof
 
 
@@ -178,21 +183,18 @@ goto CopyEnd
   if exist ".\%3\%5" copy %3\%5 "%_Dir%" > NUL
   if not %ERRORLEVEL%==0 goto:eof
 :CopyEnd
-endlocal & set /a "_Count+=1"
+endlocal & set /a "_SCount+=1"
 goto:eof
 
 
-:FAILED
-IF not %ERRORLEVEL% == 0 (
-	echo Copying failed.
-	echo Verify file write access. (Run as administrator.^)
-)
-echo MSVC integration install failed.
-pause
-goto:eof
-
+:: Status reports.
 :FINISHED
+if not %ERRORLEVEL%==0 echo ERROR: Internal script error.
+if not %_FCount%==0 (
+	echo WARNING: Copy operation failed for %_FCount% installations.
+	echo:         Verify write access. (Run as administrator.^)
+)
+if %_SCount%==0 ( echo WARNING: Failed to install any toolset.
+) else ( echo Installed integation for %_SCount% toolsets. )
 echo Done!
-if %_Count%==0 ( echo Failed to find any MSBuild toolset.
-) else ( echo Installed integation for %_Count% toolsets. )
-pause
+goto:eof

@@ -38,15 +38,19 @@ to the patch repository.
   - Accepting other platform platform types, when defined,
     based on directory structure.
   - Only installing toolsets when the base MSVC toolset is installed.
-  - Add basic progress reporting.
-  - Apply redefined install method for older versions. (Needs more testing.)
-  - This gist only: add `pause` to end of 
+  - Apply redefined install method for older versions. *(Needs more testing.)*
+  - Use `pushd` and `popd` to switch the working directory back when the
+    script finishes.
+  - On a copy error, try for the next VS installation.
+    This allows for installs and updates without admin rights.
+    E.g. when VS2017 is installed on a users' personal drive.
+  - Improve progress reporting.
 - `*.props` files
   - Add vs2017 versions.
   - Fixed `LibraryPath` version number.
 - `*.targets` files
   - Add vs2017 versions.
-  - For toolset versions 140(_xp) and 141_(xp), inherit from the Microsoft
+  - For toolset versions `140(_xp)` and `141_(xp)`, inherit from the Microsoft
     supplied configuration, to stay up to date. (As the `*.props` do.)
   - *Note*: no changes have been made to the files for older compilers.
     These have been included for proper operation of the install script.

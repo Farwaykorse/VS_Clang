@@ -3,14 +3,24 @@
 echo Uninstalling MSVC integration...
 
 
-rem Set current directory to the location of this batch file.
-cd /d %~dp0
+REM Set current directory to the location of this batch file.
+pushd "%~dp0"
+
+:: Legacy installations.
+call :fn_legacy "%ProgramFiles%"
+if defined ProgramFiles(x86) call :fn_legacy "%ProgramFiles(x86)%"
+:: VS2017 (VC++ toolset v141) and later.
+call :fn_vswhere
+
+popd
+goto FINISHED
 
 
+:fn_legacy
 :: Search for the VC toolsets == $(VCTargetsPath)
-if defined ProgramFiles(x86) (
-  set "_BaseDir=%ProgramFiles(x86)%") else (set "_BaseDir=%ProgramFiles%")
-:: TODO Is VS, before VS2017, always installed in Prog~(x86) on 64-bit systems?
+setlocal
+if [%1]==[] echo DEBUG: fn_legacy - no input & goto:eof
+set "_BaseDir=%~1"
 :: VS2010 (v100)
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
 :: VS2012 (v110)
@@ -19,12 +29,11 @@ call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V110"
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V120"
 :: VS2015 (v140)
 call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0\V140"
-:: VS2017 (v141) and later
-call :fn_installations
-goto FINISHED
+endlocal
+goto:eof
 
 
-:fn_installations
+:fn_vswhere
 :: Remove integration for VS2017 and later.
 :: Uses vswhere to find the install directories.
 setlocal
@@ -88,4 +97,3 @@ goto:eof
 
 :FINISHED
 echo Done!
-pause
