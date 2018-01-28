@@ -1,3 +1,17 @@
+::===-- msbuild/install.bat - Clang Integration in MSBuild ----------------===::
+::
+::                     The LLVM Compiler Infrastructure
+::
+:: This file is distributed under the University of Illinois Open Source
+:: License. See LICENSE.TXT for details.
+::
+::===----------------------------------------------------------------------===::
+::
+:: This file is an executable script for use on Microsoft Windows.
+:: It installs configuration files into the directory structure of Microsoft
+:: Visual Studio. To support the configuration and use of LLVM/Clang-CL.
+::
+::===----------------------------------------------------------------------===::
 @echo off
 
 echo Installing MSVC integration...

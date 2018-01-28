@@ -1,3 +1,17 @@
+::===-- msbuild/uninstall.bat - Clang Integration in MSBuild --------------===::
+::
+::                     The LLVM Compiler Infrastructure
+::
+:: This file is distributed under the University of Illinois Open Source
+:: License. See LICENSE.TXT for details.
+::
+::===----------------------------------------------------------------------===::
+::
+:: This file is an executable script for use on Microsoft Windows.
+:: It removes the LLVM/Clang-CL configuration files from the directory structure
+:: of Microsoft Visual Studio.
+::
+::===----------------------------------------------------------------------===::
 @echo off
 
 echo Uninstalling MSVC integration...
