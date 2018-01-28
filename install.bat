@@ -15,10 +15,22 @@ if not %ERRORLEVEL%==0 goto FINISHED
 :: VS2017 (VC++ toolset v141) and later.
 call :fn_vswhere
 
+:: Status reports.
+:FINISHED
+if not %ERRORLEVEL%==0 echo ERROR: Internal script error.
+if not %_FCount%==0 (
+	echo WARNING: Copy operation failed for %_FCount% installations.
+	echo:         Verify write access. (Run as administrator.^)
+)
+if %_SCount%==0 ( echo WARNING: Failed to install any toolset.
+) else ( echo Installed integation for %_SCount% toolsets. )
+echo Done!
 popd
-goto FINISHED
+exit /b
 
-:: Function Definitions.
+::===----------------------------------------------------------------------===::
+:: Function Definitions
+::===----------------------------------------------------------------------===::
 
 :fn_legacy
 :: Try known values for $(VCTargetsPath) to find MSVC toolsets.
@@ -181,17 +193,4 @@ goto CopyEnd
   if not %ERRORLEVEL%==0 goto:eof
 :CopyEnd
 endlocal & set /a "_SCount+=1"
-goto:eof
-
-
-:: Status reports.
-:FINISHED
-if not %ERRORLEVEL%==0 echo ERROR: Internal script error.
-if not %_FCount%==0 (
-	echo WARNING: Copy operation failed for %_FCount% installations.
-	echo:         Verify write access. (Run as administrator.^)
-)
-if %_SCount%==0 ( echo WARNING: Failed to install any toolset.
-) else ( echo Installed integation for %_SCount% toolsets. )
-echo Done!
 goto:eof

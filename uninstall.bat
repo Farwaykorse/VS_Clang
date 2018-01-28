@@ -6,15 +6,18 @@ REM Set current directory to the location of this batch file.
 pushd "%~dp0"
 
 :: Legacy installations.
-call :fn_legacy "%ProgramFiles%"
 if defined ProgramFiles(x86) call :fn_legacy "%ProgramFiles(x86)%"
+call :fn_legacy "%ProgramFiles%"
 :: VS2017 (VC++ toolset v141) and later.
 call :fn_vswhere
 
+echo Done!
 popd
-goto FINISHED
+exit /b
 
-:: Function Definitions.
+::===----------------------------------------------------------------------===::
+:: Function Definitions
+::===----------------------------------------------------------------------===::
 
 :fn_legacy
 :: Try known values for $(VCTargetsPath) to find MSVC toolsets.
@@ -90,7 +93,3 @@ for /f "usebackq tokens=*" %%D in (`dir "%_ToolsetDir%\LLVM-*" /a:d /b`) do (
 endlocal &REM /EnableDelayedExpansion
 endlocal
 goto:eof
-
-
-:FINISHED
-echo Done!
