@@ -198,7 +198,7 @@ if not exist %1 echo DEBUG: fn_copy - input error & goto:eof
 if not exist ".\%3\%4" goto:eof &REM No LLVM toolset configuration defined.
 echo Install: %2 (%3)
 set "_Dir=%~1\%2"
-if not exist "%_Dir%" mkdir "%_Dir%" & echo make dir
+if not exist "%_Dir%" mkdir "%_Dir%"
 if not %ERRORLEVEL%==0 goto:eof
 if not [%6]==[] goto doNotRename
   if exist ".\%3\%4" copy %3\%4 "%_Dir%\toolset.props" > NUL
