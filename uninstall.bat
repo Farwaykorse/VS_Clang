@@ -88,19 +88,19 @@ set "_ToolsetDir=%~1"
 set "_Platform=%~2"
 if not exist "%_ToolsetDir%\LLVM-*" goto:eof
 setlocal EnableDelayedExpansion
-for /f "usebackq tokens=*" %%D in (`dir "%_ToolsetDir%\LLVM-*" /a:d /b`) do (
-  echo "%_ToolsetDir%\%%D"
-  set _File="%_ToolsetDir%\%%D\toolset.props"
+for /f "usebackq tokens=*" %%D in (`dir "!_ToolsetDir!\LLVM-*" /a:d /b`) do (
+  set _File="!_ToolsetDir!\%%D\toolset.props"
+  echo !_File!
   if exist !_File! del !_File!
-  set _File="%_ToolsetDir%\%%D\toolset.targets"
+  set _File="!_ToolsetDir!\%%D\toolset.targets"
   if exist !_File! del !_File!
   :: For VS2010 & VS2012.
-  set _File="%_ToolsetDir%\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.props"
+  set _File="!_ToolsetDir!\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.props"
   if exist !_File! del !_File!
-  set _File="%_ToolsetDir%\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.targets"
+  set _File="!_ToolsetDir!\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.targets"
   if exist !_File! del !_File!
   :: Remove folder, if empty
-  rmdir "%_ToolsetDir%\%%D"
+  rmdir "!_ToolsetDir!\%%D"
 )
 endlocal &REM /EnableDelayedExpansion
 endlocal
