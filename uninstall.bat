@@ -73,7 +73,7 @@ if not exist "%_VCTargetsPath%\Platforms" goto:eof
 for /f "usebackq tokens=*" %%P in (`dir "%_VCTargetsPath%\Platforms" /a:d /b`
 ) do (
   if exist ".\%%P" (
-    call :fn_remove "%_VCTargetsPath%\Platforms\%%P\PlatformToolsets"
+    call :fn_remove "%_VCTargetsPath%\Platforms\%%P\PlatformToolsets" %%P
   )
 )
 endlocal
@@ -83,7 +83,7 @@ goto:eof
 :fn_remove
 :: Remove toolset configurations that follow the LLVM naming format.
 setlocal
-if [%1]==[] echo DEBUG: fn_remove: no input & goto:eof
+if [%2]==[] echo DEBUG: fn_remove: no input & goto:eof
 set "_ToolsetDir=%~1"
 set "_Platform=%~2"
 if not exist "%_ToolsetDir%\LLVM-*" goto:eof
