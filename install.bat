@@ -125,7 +125,7 @@ if exist "%_ToolsetDir%\%_MSname%" (
 if not %ERRORLEVEL%==0 goto:eof
 :: Installing the v110_xp toolchain.
 set   _MSname=v110_xp
-set _LLVMname=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp
+set _LLVMname=LLVM-vs2012_xp
 set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.props
 set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.targets
 if exist "%_ToolsetDir%\%_MSname%" (
