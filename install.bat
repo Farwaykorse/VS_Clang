@@ -19,7 +19,7 @@ pushd "%~dp0" &REM Set current directory to the location of this batch file.
 if /i [%1]==[--uninstall] ( set _Uninstall=1
   echo Uninstalling MSVC integration...
 ) else (
-  if not [%1]==[] echo DEBUG: Unknown input parameter. & exit /b 1
+  if not [%1]==[] echo ERROR: Unknown input parameter. & exit /b 1
   echo Installing MSVC integration...
 )
 set /a "_SuccessCnt=0"
@@ -60,7 +60,7 @@ exit /b
 :: Try known values for $(VCTargetsPath) to find MSVC toolsets.
 :fn_legacy
 setlocal
-  if [%1]==[] echo DEBUG: fn_legacy - no input & goto:eof
+  if [%1]==[] echo ERROR: fn_legacy - no input & goto:eof
   set "_BaseDir=%~1"
   :: VS2010 (v100).
   call :fn_platforms "%_BaseDir%\MSBuild\Microsoft.Cpp\v4.0"
@@ -91,7 +91,7 @@ goto:eof
 :: Find supported platforms by folder name.
 :fn_platforms
 setlocal
-  if [%1]==[] echo DEBUG: fn_platforms - no input & goto:eof
+  if [%1]==[] echo ERROR: fn_platforms - no input & goto:eof
   set "_VCTargetsPath=%~1"
   if not exist "%_VCTargetsPath%\Platforms" goto:eof
   setlocal EnableDelayedExpansion
@@ -114,7 +114,7 @@ exit /b 0 &REM Contain ERRORLEVEL.
 :: Install Clang integration for each supported toolset that is present.
 :fn_toolsets
 setlocal DisableDelayedExpansion
-  if [%2]==[] echo DEBUG: fn_toolsets - no input & goto:eof
+  if [%2]==[] echo ERROR: fn_toolsets - no input & goto:eof
   set "_ToolsetDir=%~1"
   set "_Platform=%2"
   ::===---------- configurations ------------------------------------------===::
@@ -206,8 +206,8 @@ goto:eof
 setlocal
   :: Arguments:
   ::   1 ToolsetDir, 2 Folder, 3 platform 4 .props, 5 .targets, 6 doNotRename
-  if [%5]==[]     echo DEBUG: fn_copy - no input    & goto:eof
-  if not exist %1 echo DEBUG: fn_copy - input error & goto:eof
+  if [%5]==[]     echo ERROR: fn_copy - no input    & goto:eof
+  if not exist %1 echo ERROR: fn_copy - input error & goto:eof
   if not exist ".\%3\%4" goto:eof &REM No LLVM toolset configuration defined.
   echo Install: %2 (%3)
   set "_Dir=%~1\%2"
@@ -231,7 +231,7 @@ goto:eof
 :: Remove toolset configurations that follow the LLVM naming format.
 :fn_remove
 setlocal DisableDelayedExpansion
-  if [%2]==[] echo DEBUG: fn_remove: no input & goto:eof
+  if [%2]==[] echo ERROR: fn_remove - no input & goto:eof
   set "_ToolsetDir=%~1"
   set "_Platform=%2"
   if not exist "%_ToolsetDir%\LLVM-*" goto:eof
