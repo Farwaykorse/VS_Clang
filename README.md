@@ -44,7 +44,9 @@ to the patch repository.
   - On a copy error, try for the next VS installation.
     This allows for installs and updates without admin rights.
     E.g. when VS2017 is installed on a users' personal drive.
-  - Improve progress reporting.
+  - Combined the install and uninstall script.
+    Reducing code duplication, from the shared path generation.
+  - Improved progress reporting.
 - `*.props` files
   - Add vs2017 versions.
   - Fixed `LibraryPath` version number.

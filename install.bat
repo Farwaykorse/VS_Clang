@@ -8,18 +8,24 @@
 ::===----------------------------------------------------------------------===::
 ::
 :: This file is an executable script for use on Microsoft Windows.
-:: It installs configuration files into the directory structure of Microsoft
-:: Visual Studio. To support the configuration and use of LLVM/Clang-CL.
+:: Providing the installation and removal of the configuration files,
+:: required to support the integration of LLVM/Clang-CL, in the directory
+:: structure of Microsoft Visual Studio.
 ::
 ::===----------------------------------------------------------------------===::
 @echo off
+setlocal
 pushd "%~dp0" &REM Set current directory to the location of this batch file.
-
-echo Installing MSVC integration...
+if /i [%1]==[--uninstall] ( set _Uninstall=1
+  echo Uninstalling MSVC integration...
+) else (
+  if not [%1]==[] echo DEBUG: Unknown input parameter. & exit /b 1
+  echo Installing MSVC integration...
+)
 set /a "_SuccessCnt=0"
 set /a "_FailCnt=0"
 
-:: Legacy installations. By explicit directory structure.
+:: Legacy installations. Detection by explicit directory structure.
 if defined ProgramFiles(x86) call :fn_legacy "%ProgramFiles(x86)%"
 if not %ERRORLEVEL%==0 goto FINISHED
 call :fn_legacy "%ProgramFiles%"
@@ -29,15 +35,22 @@ call :fn_vswhere
 
 :FINISHED
 if not %ERRORLEVEL%==0 echo ERROR: Internal script error.
-if not %_FailCnt%==0 (
-	echo WARNING: Copy operation failed for %_FailCnt% installations.
-	echo:         Verify write access. (Run as administrator.^)
+if not defined _Uninstall (
+  if not %_FailCnt%==0 (
+    echo WARNING: Copy operation failed for %_FailCnt% installations.
+    echo:         Verify write access. (Run as administrator.^)
+  )
+  if %_SuccessCnt%==0 ( echo WARNING: Failed to install any toolset.
+  ) else ( echo Installed integation for %_SuccessCnt% toolsets. )
+  goto END_ALL
 )
-if %_SuccessCnt%==0 ( echo WARNING: Failed to install any toolset.
-) else ( echo Installed integation for %_SuccessCnt% toolsets. )
-echo Done!
+set /a "_Removed=_SuccessCnt - _FailCnt"
+echo Removed %_Removed% of %_SuccessCnt% LLVM configurations.
 
+:END_ALL
+echo Done!
 popd &REM Reset current directory.
+endlocal
 exit /b
 
 ::===----------------------------------------------------------------------===::
@@ -87,7 +100,11 @@ setlocal EnableDelayedExpansion
 for /f "usebackq tokens=*" %%P in (`dir "!_VCTargetsPath!\Platforms" /a:d /b`
 ) do (
   if exist ".\%%P" (
-    call :fn_toolsets "!_VCTargetsPath!\Platforms\%%P\PlatformToolsets" %%P
+    if not defined _Uninstall (
+      call :fn_toolsets "!_VCTargetsPath!\Platforms\%%P\PlatformToolsets" %%P
+    ) else (
+      call :fn_remove "!_VCTargetsPath!\Platforms\%%P\PlatformToolsets" %%P
+	)
     if not !ERRORLEVEL!==0 set /a "_FailCnt+=1"
   )
 )
@@ -214,3 +231,31 @@ goto CopyEnd
 :CopyEnd
 endlocal & set /a "_SuccessCnt+=1"
 goto:eof
+
+
+:fn_remove
+:: Remove toolset configurations that follow the LLVM naming format.
+setlocal DisableDelayedExpansion
+if [%2]==[] echo DEBUG: fn_remove: no input & goto:eof
+set "_ToolsetDir=%~1"
+set "_Platform=%2"
+if not exist "%_ToolsetDir%\LLVM-*" goto:eof
+setlocal EnableDelayedExpansion
+for /f "usebackq tokens=*" %%D in (`dir "!_ToolsetDir!\LLVM-*" /a:d /b`) do (
+  set /a "_SuccessCnt+=1"
+  set _File="!_ToolsetDir!\%%D\toolset.props"
+  if exist !_File! del !_File! > NUL
+  set _File="!_ToolsetDir!\%%D\toolset.targets"
+  if exist !_File! del !_File! > NUL
+  :: VS2010 and VS2012:
+  set _File="!_ToolsetDir!\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.props"
+  if exist !_File! del !_File! > NUL
+  set _File="!_ToolsetDir!\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.targets"
+  if exist !_File! del !_File! > NUL
+  :: Remove folder, if empty, else report
+  rmdir "!_ToolsetDir!\%%D" || (echo !_ToolsetDir!\%%D & set /a "_FailCnt+=1")
+)
+endlocal & ( REM /EnableDelayedExpansion
+  set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%")
+endlocal & set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%"
+exit /b 0 &REM Contain ERRORLEVEL.
