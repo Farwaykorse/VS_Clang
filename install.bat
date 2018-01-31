@@ -83,6 +83,7 @@ setlocal
   for /f "usebackq tokens=*" %%i in (
     `%_Vswhere% -all -prerelease -products * -property installationPath`
   ) do ( REM Construct path equal to $(VCTargetsPath).
+    echo Found VS: %%i
     call :fn_platforms "%%i\Common7\IDE\VC\VCTargets"
   )
 endlocal & set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%"
