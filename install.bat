@@ -15,7 +15,7 @@
 ::===----------------------------------------------------------------------===::
 @echo off
 setlocal
-pushd "%~dp0" &REM Set current directory to the location of this batch file.
+pushd "%~dp0" & REM Set current directory to the location of this batch file.
 if /i [%1]==[--uninstall] ( set _Uninstall=1
   echo Uninstalling MSVC integration...
 ) else (
@@ -49,7 +49,7 @@ echo Removed %_Removed% of %_SuccessCnt% LLVM configurations.
 
 :END_ALL
 echo Done!
-popd &REM Reset current directory.
+popd & REM Reset current directory.
 endlocal
 exit /b
 
@@ -110,94 +110,90 @@ setlocal
   endlocal & ( REM /EnableDelayedExpansion
            set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%" )
 endlocal & set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%"
-exit /b 0 &REM Contain ERRORLEVEL.
+exit /b 0 & REM Contain ERRORLEVEL.
 
 :: Install Clang integration for each supported toolset that is present.
 :fn_toolsets
 setlocal DisableDelayedExpansion
   if [%2]==[] echo ERROR: fn_toolsets - no input & goto:eof
   set "_ToolsetDir=%~1"
-  set "_Platform=%2"
+  set "_Platform=%~2"
   ::===---------- configurations ------------------------------------------===::
+  :: _Name      Name for the LLVM toolset.
+  :: _Props     Predefined property file.
+  :: _Targets   Predefined targets file.
+  :: _NoRename  Set to TRUE to keep the predefined file names. (v100, v110)
+
   :: Installing the v100 toolchain.
-  set   _MSname=v100           &REM Default toolset folder.
-  set _LLVMname=LLVM-vs2010    &REM New folder.
-  set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2010.props
-  set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2010.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy ^
-      "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets% "doNotRename")
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set     _Name=LLVM-vs2010
+    set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2010.props
+    set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2010.targets
+    set _NoRename=TRUE
+    if exist "%_ToolsetDir%\v100" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
 
   :: Installing the v110 toolchain.
-  set   _MSname=v110
-  set _LLVMname=LLVM-vs2012
-  set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2012.props
-  set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2012.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy ^
-      "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets% "doNotRename")
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set     _Name=LLVM-vs2012
+    set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2012.props
+    set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2012.targets
+    set _NoRename=TRUE
+    if exist "%_ToolsetDir%\v110" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
   :: Installing the v110_xp toolchain.
-  set   _MSname=v110_xp
-  set _LLVMname=LLVM-vs2012_xp
-  set    _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.props
-  set  _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy ^
-      "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets% "doNotRename")
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2012_xp
+    set   _Props=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.props
+    set _Targets=Microsoft.Cpp.%_Platform%.LLVM-vs2012_xp.targets
+    set _NoRename=TRUE
+  if exist "%_ToolsetDir%\v110_xp" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
 
   :: Installing the v120 toolchain.
-  set   _MSname=v120
-  set _LLVMname=LLVM-vs2013
-  set    _Props=toolset-vs2013.props
-  set  _Targets=toolset-vs2013.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2013
+    set   _Props=toolset-vs2013.props
+    set _Targets=toolset-vs2013.targets
+    if exist "%_ToolsetDir%\v120" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
   :: Installing the v120_xp toolchain.
-  set   _MSname=v120_xp
-  set _LLVMname=LLVM-vs2013_xp
-  set    _Props=toolset-vs2013_xp.props
-  set  _Targets=toolset-vs2013_xp.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2013_xp
+    set   _Props=toolset-vs2013_xp.props
+    set _Targets=toolset-vs2013_xp.targets
+    if exist "%_ToolsetDir%\v120_xp" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
 
   :: Installing the v140 toolchain.
-  set   _MSname=v140
-  set _LLVMname=LLVM-vs2014
-  set    _Props=toolset-vs2014.props
-  set  _Targets=toolset-vs2014.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2014
+    set   _Props=toolset-vs2014.props
+    set _Targets=toolset-vs2014.targets
+    if exist "%_ToolsetDir%\v140" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
   :: Installing the v140_xp toolchain.
-  set   _MSname=v140_xp
-  set _LLVMname=LLVM-vs2014_xp
-  set    _Props=toolset-vs2014_xp.props
-  set  _Targets=toolset-vs2014_xp.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2014_xp
+    set   _Props=toolset-vs2014_xp.props
+    set _Targets=toolset-vs2014_xp.targets
+    if exist "%_ToolsetDir%\v140_xp" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
 
   :: Installing the v141 toolchain.
-  set   _MSname=v141        &REM Default toolset folder.
-  set _LLVMname=LLVM-vs2017 &REM New folder.
-  set    _Props=toolset-vs2017.props
-  set  _Targets=toolset-vs2017.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2017
+    set   _Props=toolset-vs2017.props
+    set _Targets=toolset-vs2017.targets
+    if exist "%_ToolsetDir%\v141" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
   :: Installing the v141_xp toolchain.
-  set   _MSname=v141_xp
-  set _LLVMname=LLVM-vs2017_xp
-  set    _Props=toolset-vs2017_xp.props
-  set  _Targets=toolset-vs2017_xp.targets
-  if exist "%_ToolsetDir%\%_MSname%" (
-    call :fn_copy "%_ToolsetDir%" %_LLVMname% %_Platform% %_Props% %_Targets%)
-  if not %ERRORLEVEL%==0 goto:eof
+  setlocal
+    set    _Name=LLVM-vs2017_xp
+    set   _Props=toolset-vs2017_xp.props
+    set _Targets=toolset-vs2017_xp.targets
+    if exist "%_ToolsetDir%\v141_xp" call :fn_copy
+  endlocal & set "_SuccessCnt=%_SuccessCnt%" & if not %ERRORLEVEL%==0 goto:eof
   ::===--------------------------------------------------------------------===::
 endlocal & set "_SuccessCnt=%_SuccessCnt%"
 goto:eof
@@ -205,25 +201,28 @@ goto:eof
 :: Perform the copy operations.
 :fn_copy
 setlocal
-  :: Arguments:
-  ::   1 ToolsetDir, 2 Folder, 3 platform 4 .props, 5 .targets, 6 doNotRename
-  if [%5]==[]     echo ERROR: fn_copy - no input    & goto:eof
-  if not exist %1 echo ERROR: fn_copy - input error & goto:eof
-  if not exist ".\%3\%4" goto:eof &REM No LLVM toolset configuration defined.
-  echo Install: %2 (%3)
-  set "_Dir=%~1\%2"
+  if not defined _ToolsetDir goto:eof
+  if not defined _Props goto:eof
+  if not defined _Targets goto:eof
+  if not defined _Name goto:eof
+
+  echo:  %_Name% (%_Platform%)
+  set _PropsFile=".\%_Platform%\%_Props%"
+  set _TargetsFile=".\%_Platform%\%_Targets%"
+  set "_Dir=%_ToolsetDir%\%_Name%"
+
   if not exist "%_Dir%" mkdir "%_Dir%"
   if not %ERRORLEVEL%==0 goto:eof
-  if not [%6]==[] goto doNotRename
-    if exist ".\%3\%4" copy %3\%4 "%_Dir%\toolset.props" > NUL
+  if [%_NoRename%]==[TRUE] goto doNotRename
+    if exist %_PropsFile% copy %_PropsFile% "%_Dir%\toolset.props" > NUL
     if not %ERRORLEVEL%==0 goto:eof
-    if exist ".\%3\%5" copy %3\%5 "%_Dir%\toolset.targets" > NUL
+    if exist %_TargetsFile% copy %_TargetsFile% "%_Dir%\toolset.targets" > NUL
     if not %ERRORLEVEL%==0 goto:eof
   goto CopyEnd
-  :doNotRename &REM VS2010 and VS2012.
-    if exist ".\%3\%4" copy %3\%4 "%_Dir%" > NUL
+  :doNotRename & REM VS2010 and VS2012.
+    if exist %_PropsFile% copy %_PropsFile% "%_Dir%" > NUL
     if not %ERRORLEVEL%==0 goto:eof
-    if exist ".\%3\%5" copy %3\%5 "%_Dir%" > NUL
+    if exist %_TargetsFile% copy %_TargetsFile% "%_Dir%" > NUL
     if not %ERRORLEVEL%==0 goto:eof
   :CopyEnd
 endlocal & set /a "_SuccessCnt+=1"
@@ -248,10 +247,10 @@ setlocal DisableDelayedExpansion
     if exist !_File! del !_File! > NUL
     set _File="!_ToolsetDir!\%%D\Microsoft.Cpp.%_Platform%.LLVM-vs201*.targets"
     if exist !_File! del !_File! > NUL
-    :: Remove folder, if empty, else report
+    :: Remove folder if empty, else report.
     rmdir "!_ToolsetDir!\%%D" || (echo !_ToolsetDir!\%%D & set /a "_FailCnt+=1")
   )
   endlocal & ( REM /EnableDelayedExpansion
            set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%" )
 endlocal & set "_SuccessCnt=%_SuccessCnt%" & set "_FailCnt=%_FailCnt%"
-exit /b 0 &REM Contain ERRORLEVEL.
+exit /b 0 & REM Contain ERRORLEVEL.
