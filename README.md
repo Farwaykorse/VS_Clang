@@ -5,9 +5,15 @@
 Implementation to test an update for the LLVM/Clang integration.
 To support Visual Studio 2017.
 
-Target: Clang for Windows, stable release v5.0.1
+This fix is a temporary solution until release 7 of LLVM.
+Then a new integration system will be introduced, using a Visual Studio plugin.
 
-For the progress on an LLVM patch and to report issues go to:
+Target: Clang for Windows, stable release v6.0.0
+*Note*: Every version update of LLVM requires editing the directories by hand,
+and rerunning the install-script.
+
+The new plugin integration method makes the old project to create a LLVM patch
+unnecessary:
 [Farwaykorse/llvm](https://github.com/Farwaykorse/llvm)  
 *Note*: This version is for testing, and might contain changes not yet published
 to the patch repository.
