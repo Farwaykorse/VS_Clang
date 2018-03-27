@@ -51,6 +51,7 @@ echo Removed %_Removed% of %_SuccessCnt% LLVM configurations.
 echo Done!
 popd & REM Reset current directory.
 endlocal
+pause
 exit /b
 
 ::===----------------------------------------------------------------------===::
