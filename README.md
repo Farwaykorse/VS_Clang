@@ -8,7 +8,7 @@ To support Visual Studio 2017.
 This fix is a temporary solution until release 7 of LLVM.
 Then a new integration system will be introduced, using a Visual Studio plugin.
 
-Target: Clang for Windows, stable release v6.0.0  
+Target: Clang for Windows, stable release v6.0.1  
 *Note*: Every version update of LLVM requires editing the directories by hand,
 and rerunning the install-script.
 
