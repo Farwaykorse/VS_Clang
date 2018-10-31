@@ -19,7 +19,7 @@ This adds LLVM toolset configurations for any installed legacy toolsets since
 VS2010 (including the Windows XP toolsets).
 Allowing building these toolset with the targeted version of LLVM/Clang.
 
-Target: Clang for Windows, stable release **v7.0.0**  
+Target: Clang for Windows, stable release **v6.0.1**  
 
 Expected to work with:  
 Visual Studio versions: VS2010, VS2013, VS2015 and VS2017.  
