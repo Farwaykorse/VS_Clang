@@ -1,22 +1,29 @@
 <!-------------------------------------------------------------><a id="top"></a>
 # Clang Integration for Visual Studio, stand-alone
 <!----------------------------------------------------------------------------->
+Users of VS2017 (and later) should try the Visual Studio extension
+[LLVM Compiler Toolchain](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.llvm-toolchain).
+It is more configurable, contains some bug-fixes and is supported by LLVM.
 
-Implementation to test an update for the LLVM/Clang integration.
-To support Visual Studio 2017.
+Users of VS2015 and earlier, or who want to compile with LLVM/Clang using the
+older toolsets, can try this implementation.
+Or try extracting the new implementation, see a
+[solution by CFSworks at stackoverflow](https://stackoverflow.com/a/52582414/2504346)
 
-This fix is a temporary solution until release 7 of LLVM.
-Then a new integration system will be introduced, using a Visual Studio plugin.
+This is an reimplementation of the legacy integration method, as used by the
+LLVM installer up to v6.0.1.
+Originally created to test an update for the LLVM/Clang integration, adding
+support for Visual Studio 2017.
 
-Target: Clang for Windows, stable release v6.0.1  
-*Note*: Every version update of LLVM requires editing the directories by hand,
-and rerunning the install-script.
+This adds LLVM toolset configurations for any installed legacy toolsets since
+VS2010 (including the Windows XP toolsets).
+Allowing building these toolset with the targeted version of LLVM/Clang.
 
-The new plugin integration method makes the old project to create a LLVM patch
-unnecessary:
-[Farwaykorse/llvm](https://github.com/Farwaykorse/llvm)  
-*Note*: This version is for testing, and might contain changes not yet published
-to the patch repository.
+Target: Clang for Windows, stable release **v7.0.0**  
+
+Expected to work with:  
+Visual Studio versions: VS2010, VS2013, VS2015 and VS2017.  
+Visual C++ Build Tools: 2017 and 2015.
 
 
 <!----------------------------------------------------><a id="instructions"></a>
@@ -31,8 +38,8 @@ to the patch repository.
 
 ### Removal
 1. Run the supplied `uninstall.bat` (as Administrator, when needed.)
-2. Restore the original configuration.
-   `{LLVM instal dir.}\tools\msbuild\install.bat`
+2. (For LLVM v6.01 and earlier) Restore the original configuration.
+   `{LLVM install dir.}\tools\msbuild\install.bat`
 
 
 <!---------------------------------------------------------><a id="changes"></a>
@@ -41,7 +48,7 @@ to the patch repository.
 - `install.bat` / `uninstall.bat`  
   - Total rewrite, to support user defined install locations for VS2017
     Using the [Visual Studio Locator Tool](https://github.com/Microsoft/vswhere)
-  - Accepting other platform platform types, when defined,
+  - Accepting other platform types, when defined,
     based on directory structure.
   - Only installing toolsets when the base MSVC toolset is installed.
   - Apply redefined install method for older versions. *(Needs more testing.)*
